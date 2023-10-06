@@ -2,11 +2,12 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class IsometricController : MonoBehaviour
+public class TPSControllerDani : MonoBehaviour
 {
     private CharacterController _controller;
     private float _horizontal;
     private float _vertical;
+    private Transform _camera;
 
     //variables para velocidad, salto y gravedad
     [SerializeField] private float _playerSpeed = 5;
@@ -28,6 +29,7 @@ public class IsometricController : MonoBehaviour
     void Start()
     {
         _controller = GetComponent<CharacterController>();
+        _camera = Camera.main.transform;
     }
 
     // Update is called once per frame
@@ -36,7 +38,13 @@ public class IsometricController : MonoBehaviour
         _horizontal = Input.GetAxisRaw("Horizontal");
         _vertical = Input.GetAxisRaw("Vertical");
 
-        Movement();
+        if(Input.GetButton("Fire2"))
+        {
+            AimMovement();
+        }else 
+        {
+            Movement();
+        } 
         Jump();
     }
 
@@ -46,12 +54,30 @@ public class IsometricController : MonoBehaviour
 
         if(direction != Vector3.zero)
         {
-            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg;
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y; //_camera.eulerAngles.y devuele el eje de rotacion en angulos
             float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, targetAngle, ref turnSmoothVelocity, turnSmoothTime);
 
             transform.rotation = Quaternion.Euler(0, smoothAngle, 0);
+            
+            Vector3 moveDirection = Quaternion.Euler(0, targetAngle,0) * Vector3.forward; //hace que la direccion apunte donde mira la camara
 
-            _controller.Move(direction.normalized * _playerSpeed * Time.deltaTime);
+            _controller.Move(moveDirection.normalized * _playerSpeed * Time.deltaTime);
+        }
+    }
+
+        void AimMovement()
+    {
+        Vector3 direction = new Vector3(_horizontal, 0, _vertical);
+
+        float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y; //_camera.eulerAngles.y devuele el eje de rotacion en angulos
+        float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, _camera.eulerAngles.y, ref turnSmoothVelocity, turnSmoothTime);
+        transform.rotation = Quaternion.Euler(0, smoothAngle, 0);
+
+        if(direction != Vector3.zero)
+        {
+            Vector3 moveDirection = Quaternion.Euler(0, targetAngle,0) * Vector3.forward; //hace que la direccion apunte donde mira la camara
+
+            _controller.Move(moveDirection.normalized * _playerSpeed * Time.deltaTime);
         }
     }
 
