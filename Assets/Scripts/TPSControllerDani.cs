@@ -24,12 +24,16 @@ public class TPSControllerDani : MonoBehaviour
     [SerializeField] private float _sensorRadius = 0.2f;
     [SerializeField] private LayerMask _groundLayer;
     private bool _isGrounded;
+
+    //animaciones
+    private Animator _anim;
     
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
         _controller = GetComponent<CharacterController>();
         _camera = Camera.main.transform;
+        _anim = GetComponentInChildren<Animator>();
     }
 
     // Update is called once per frame
@@ -52,6 +56,9 @@ public class TPSControllerDani : MonoBehaviour
     {
         Vector3 direction = new Vector3(_horizontal, 0, _vertical);
 
+        _anim.SetFloat("VelX", 0); //para desactivar las animaciones de izquierda/derecha
+        _anim.SetFloat("VelZ", direction.magnitude); //magnitude devuelve el tamano del vector pero sin ninguna direccion   
+
         if(direction != Vector3.zero)
         {
             float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y; //_camera.eulerAngles.y devuele el eje de rotacion en angulos
@@ -68,6 +75,9 @@ public class TPSControllerDani : MonoBehaviour
         void AimMovement()
     {
         Vector3 direction = new Vector3(_horizontal, 0, _vertical);
+
+        _anim.SetFloat("VelX", _horizontal); //animaciones izquierda derecha
+        _anim.SetFloat("VelZ", _vertical); //animaciones delante y atras
 
         float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + _camera.eulerAngles.y; //_camera.eulerAngles.y devuele el eje de rotacion en angulos
         float smoothAngle = Mathf.SmoothDampAngle(transform.eulerAngles.y, _camera.eulerAngles.y, ref turnSmoothVelocity, turnSmoothTime);
