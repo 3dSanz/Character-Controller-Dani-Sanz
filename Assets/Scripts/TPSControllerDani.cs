@@ -27,6 +27,9 @@ public class TPSControllerDani : MonoBehaviour
 
     //animaciones
     private Animator _anim;
+
+    //dano
+    public int _damage = 2;
     
     // Start is called before the first frame update
     void Awake()
@@ -50,6 +53,10 @@ public class TPSControllerDani : MonoBehaviour
             Movement();
         } 
         Jump();
+        if(Input.GetKeyDown(KeyCode.K))
+        {
+            RayTest();
+        }
     }
 
     void Movement()
@@ -95,10 +102,12 @@ public class TPSControllerDani : MonoBehaviour
     {
 
         _isGrounded = Physics.CheckSphere(_sensorPosition.position, _sensorRadius, _groundLayer);
+        /*_isGrounded = Physics.Raycast(_sensorPosition.position, Vector3.down, _sensorRadius, _groundLayer); //Raycast devuelve una bool, por lo que se le puede asignar al _isGrounded
+        Debug.DrawRay(transform.position, Vector3.down * _sensorRadius, Color.red); //Para dibujar el rayo*/
 
         if(_isGrounded && _playerGravity.y < 0)
         {
-            _playerGravity.y = 0;
+            _playerGravity.y = -2;
         }
 
         if(_isGrounded && Input.GetButtonDown("Jump"))
@@ -110,4 +119,34 @@ public class TPSControllerDani : MonoBehaviour
         
         _controller.Move(_playerGravity * Time.deltaTime);
     }
+
+    void RayTest() //Rayo hacia adelante
+    {
+        /*if(Physics.Raycast(transform.position, transform.forward, 10)) // hay que indicarle posicion, direccion y tamano
+        {
+            Debug.Log("Hit");
+            Debug.DrawRay(transform.position, transform.forward * 10, Color.green); //Para dibujar el rayo si impacta
+        }else
+
+            {
+                Debug.Log("No Hit");
+                Debug.DrawRay(transform.position, transform.forward * 10, Color.red); //Para dibujar el rayo si no impacta
+            }*/
+
+        RaycastHit hit;
+        if(Physics.Raycast(transform.position, transform.forward, out hit, 10)) //hit almacena la informacion del objeto con el que haya impactado
+        {
+            Debug.Log(hit.transform.name);
+            Debug.Log(hit.transform.position);
+            //Destroy(hit.transform.gameObject);
+
+            Box caja = hit.transform.GetComponent<Box>();
+            if(caja != null)
+            {
+                caja.TakeDamage(_damage);
+            }
+            
+        }
+    }
+
 }
