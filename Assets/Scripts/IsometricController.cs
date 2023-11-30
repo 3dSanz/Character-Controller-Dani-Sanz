@@ -23,6 +23,7 @@ public class IsometricController : MonoBehaviour
     [SerializeField] private float _sensorRadius = 0.2f;
     [SerializeField] private LayerMask _groundLayer;
     private bool _isGrounded;
+    private int _damage = 5;
     
     // Start is called before the first frame update
     void Start()
@@ -62,6 +63,12 @@ public class IsometricController : MonoBehaviour
 
             _controller.Move(direction.normalized * _playerSpeed * Time.deltaTime);
         }
+
+            Box caja = hit.transform.GetComponent<Box>();
+            if(caja != null)
+            {
+                caja.TakeDamage(_damage);
+            }
     }
 
     void Jump()
